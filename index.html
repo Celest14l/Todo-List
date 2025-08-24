@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naruto Themed To-Do List</title>
+    <style>
+        /* CSS styles are now internal */
+        :root {
+            --primary-color: #FF7F50; /* Naruto Orange */
+            --dark-bg: #1a1a1a;
+            --light-bg: #f4f4f4;
+            --dark-card-bg: #2a2a2a;
+            --light-card-bg: #ffffff;
+            --dark-text: #f0f0f0;
+            --light-text: #333;
+            --revision-color: #40E0D0;
+            --revision-text-color: #000;
+            --button-color: #ff6347;
+            --button-hover-color: #ff4500;
+            --progress-red: #e74c3c;
+            --progress-green: #2ecc71;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.4s, color 0.4s;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .light-theme {
+            background-color: var(--light-bg);
+            color: var(--light-text);
+        }
+
+        .light-theme .card {
+            background-color: var(--light-card-bg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .dark-theme {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .dark-theme .card {
+            background-color: var(--dark-card-bg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #theme-toggle {
+            background: var(--button-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        #theme-toggle:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        .naruto-motivation {
+            margin-top: 15px;
+        }
+
+        .naruto-motivation img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .naruto-motivation p {
+            font-style: italic;
+            margin-top: 15px;
+            font-size: 1.1em;
+            padding: 10px;
+            line-height: 1.5;
+        }
+
+        .countdown-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .countdown {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            transition: background-color 0.4s, box-shadow 0.4s;
+        }
+
+        .countdown h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .countdown input[type="date"] {
+            margin-top: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: inherit;
+            color: inherit;
+        }
+        
+        .todo-section {
+            margin-top: 20px;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        .controls-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .task-input-container {
+            display: flex;
+            width: 100%;
+        }
+
+        #task-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #555;
+            border-radius: 8px 0 0 8px;
+            background-color: inherit;
+            color: inherit;
+            font-size: 1em;
+        }
+
+        #add-task-btn {
+            padding: 12px 20px;
+            border: none;
+            background-color: var(--button-color);
+            color: white;
+            cursor: pointer;
+            border-radius: 0 8px 8px 0;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        
+        #add-task-btn:hover {
+            background-color: var(--button-hover-color);
+        }
+
+        #calendar {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #555;
+            background-color: inherit;
+            color: inherit;
+        }
+
+        #task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #task-list li {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: rgba(0,0,0,0.1); /* Slight background for items */
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.4s, box-shadow 0.4s;
+        }
+        
+        #task-list li.completed span {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        #task-list li.revision {
+            background-color: var(--revision-color);
+            color: var(--revision-text-color);
+            font-weight: bold;
+        }
+
+        #task-list li input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        
+        #task-list li span {
+            flex-grow: 1;
+        }
+
+        #task-list li .delete-btn {
+            margin-left: auto;
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            line-height: 1;
+            transition: background-color 0.3s;
+        }
+
+        #task-list li .delete-btn:hover {
+            background: #cc0000;
+        }
+
+        /* NEW: Progress Chart Styles */
+        .progress-section {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .progress-section h3 {
+            margin-top: 0;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #555;
+            border-radius: 25px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .light-theme .progress-bar-container {
+            background-color: #e0e0e0;
+        }
+
+        #progress-bar-fill {
+            height: 25px;
+            width: 0%; /* Initial width */
+            border-radius: 25px;
+            transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
+        }
+
+        #progress-bar-fill.red {
+            background-color: var(--progress-red);
+        }
+
+        #progress-bar-fill.normal {
+            background-color: var(--primary-color);
+        }
+
+        #progress-bar-fill.green {
+            background-color: var(--progress-green);
+        }
+
+        #progress-text {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <button id="theme-toggle">Toggle Theme</button>
+            </div>
+            <div class="naruto-motivation">
+                <img src="https://wallpapercave.com/wp/wp8520339.jpg" alt="Naruto Motivation">
+                <p id="motivational-quote">"Hard work is worthless for those that don't believe in themselves." - Naruto Uzumaki</p>
+            </div>
+        </header>
+
+        <main>
+            <div class="countdown-container">
+                <div class="countdown card">
+                    <h3>Syllabus</h3>
+                    <p id="syllabus-countdown">Set a date!</p>
+                    <input type="date" id="syllabus-date">
+                </div>
+                <div class="countdown card">
+                    <h3>Syllabus Final</h3>
+                    <p id="syllabus-final-countdown">Set a date!</p>
+                    <input type="date" id="syllabus-final-date">
+                </div>
+                <div class="countdown card">
+                    <h3>Prelims</h3>
+                    <p id="prelims-countdown">Set a date!</p>
+                    <input type="date" id="prelims-date">
+                </div>
+            </div>
+
+            <div class="todo-section card">
+                <div class="controls-container">
+                    <input type="date" id="calendar">
+                </div>
+                <div class="task-input-container">
+                    <input type="text" id="task-input" placeholder="Add a new task for the selected date...">
+                    <button id="add-task-btn">Add Task</button>
+                </div>
+                <ul id="task-list"></ul>
+            </div>
+
+            <!-- NEW: Progress Chart HTML -->
+            <div class="progress-section card">
+                <h3 id="progress-title">Today's Progress</h3>
+                <div class="progress-bar-container">
+                    <div id="progress-bar-fill"></div>
+                </div>
+                <p id="progress-text">No tasks for this day.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Existing DOM Elements
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            const motivationalQuote = document.getElementById('motivational-quote');
+            const calendar = document.getElementById('calendar');
+            const taskInput = document.getElementById('task-input');
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const taskList = document.getElementById('task-list');
+
+            // NEW: Progress Chart DOM Elements
+            const progressBarFill = document.getElementById('progress-bar-fill');
+            const progressText = document.getElementById('progress-text');
+            const progressTitle = document.getElementById('progress-title');
+
+            let userName = '';
+
+            function getUserName() {
+                userName = localStorage.getItem('todoUserName');
+                if (!userName) {
+                    userName = prompt("Welcome! What's your name, Warrior?");
+                    if (userName && userName.trim()) {
+                        localStorage.setItem('todoUserName', userName.trim());
+                    } else {
+                        userName = "Warrior";
+                    }
+                }
+            }
+
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('light-theme');
+                body.classList.toggle('dark-theme');
+            });
+
+            const quotes = [
+                { quote: "To know what is right and choose to ignore it is the act of a coward.", author: "Kakashi Hatake" },
+                { quote: "The moment people come to know love, they run the risk of carrying hate.", author: "Obito Uchiha" },
+                { quote: "Hard work is worthless for those that don't believe in themselves.", author: "Naruto Uzumaki" },
+                { quote: "I won't run away anymore... I won't go back on my word... that is my ninja way!", author: "Naruto Uzumaki" },
+                { quote: "Talent is something you make bloom, instinct is something you polish.", author: "Oikawa Tooru (Haikyuu!!)" },
+                { quote: "Being the best means being better than everyone else.", author: "Isagi Yoichi (Blue Lock)" },
+                { quote: "If you're going to hit it, hit it until it breaks!", author: "Oikawa Tooru (Haikyuu!!)" }
+            ];
+
+            let quoteIndex = 0;
+            function showMotivationalQuote() {
+                const currentQuote = quotes[quoteIndex];
+                motivationalQuote.innerHTML = `"${currentQuote.quote}" - ${currentQuote.author}. <br>You've got this, ${userName}!`;
+                quoteIndex = (quoteIndex + 1) % quotes.length;
+            }
+            
+            // Countdown Timer Logic (no changes)
+            let countdownIntervals = {};
+            function setupCountdown(inputId, displayId, storageKey) {
+                const inputElement = document.getElementById(inputId);
+                const displayElement = document.getElementById(displayId);
+                
+                const update = (targetDate) => {
+                    if (countdownIntervals[storageKey]) clearInterval(countdownIntervals[storageKey]);
+                    if (!targetDate) return;
+
+                    countdownIntervals[storageKey] = setInterval(() => {
+                        const distance = new Date(targetDate).getTime() - new Date().getTime();
+                        if (distance < 0) {
+                            clearInterval(countdownIntervals[storageKey]);
+                            displayElement.textContent = "DEADLINE PASSED";
+                            return;
+                        }
+                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        displayElement.textContent = `${days}d ${hours}h left`;
+                    }, 1000);
+                };
+
+                const savedDate = localStorage.getItem(storageKey);
+                if (savedDate) {
+                    inputElement.value = savedDate;
+                    update(savedDate);
+                }
+                inputElement.addEventListener('change', (e) => {
+                    localStorage.setItem(storageKey, e.target.value);
+                    update(e.target.value);
+                });
+            }
+
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || {};
+
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+
+            // NEW: Progress Chart Update Function
+            function updateProgressChart(date) {
+                const dayTasks = tasks[date] || [];
+                const totalTasks = dayTasks.length;
+
+                if (totalTasks === 0) {
+                    progressText.textContent = "No tasks for this day. Add one!";
+                    progressBarFill.style.width = '0%';
+                    return;
+                }
+
+                const completedTasks = dayTasks.filter(task => task.completed).length;
+                const percentage = Math.round((completedTasks / totalTasks) * 100);
+
+                // Update text and bar width
+                progressText.textContent = `${percentage}% Complete (${completedTasks}/${totalTasks})`;
+                progressBarFill.style.width = `${percentage}%`;
+
+                // Update bar color based on percentage
+                progressBarFill.classList.remove('red', 'normal', 'green');
+                if (percentage <= 35) {
+                    progressBarFill.classList.add('red');
+                } else if (percentage > 70) {
+                    progressBarFill.classList.add('green');
+                } else {
+                    progressBarFill.classList.add('normal');
+                }
+            }
+
+            function renderTasks(date) {
+                taskList.innerHTML = '';
+                const dayTasks = tasks[date] || [];
+                dayTasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    if (task.isRevision) li.classList.add('revision');
+                    if (task.completed) li.classList.add('completed');
+                    
+                    li.innerHTML = `
+                        <input type="checkbox" data-index="${index}" ${task.completed ? 'checked' : ''}>
+                        <span>${task.text}</span>
+                        <button class="delete-btn" data-index="${index}">✖</button>
+                    `;
+                    taskList.appendChild(li);
+                });
+                // Update chart whenever tasks are rendered
+                updateProgressChart(date);
+            }
+
+            addTaskBtn.addEventListener('click', () => {
+                const taskText = taskInput.value.trim();
+                const selectedDate = calendar.value;
+                if (taskText && selectedDate) {
+                    if (!tasks[selectedDate]) tasks[selectedDate] = [];
+                    tasks[selectedDate].push({ text: taskText, completed: false, isRevision: false });
+                    taskInput.value = '';
+                    saveTasks();
+                    renderTasks(selectedDate); // Re-render tasks for the day
+                } else {
+                    alert("Please enter a task and select a date.");
+                }
+            });
+
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTaskBtn.click();
+            });
+
+            taskList.addEventListener('click', (e) => {
+                const selectedDate = calendar.value;
+                const target = e.target;
+
+                if (target.matches('.delete-btn')) {
+                    const index = target.dataset.index;
+                    tasks[selectedDate].splice(index, 1);
+                } else if (target.matches('input[type="checkbox"]')) {
+                    const index = target.dataset.index;
+                    const task = tasks[selectedDate][index];
+                    task.completed = target.checked;
+
+                    if (task.completed && !task.isRevision && !task.revisionsScheduled) {
+                        scheduleRevisions(task.text, selectedDate);
+                        task.revisionsScheduled = true;
+                    }
+                    target.parentElement.classList.toggle('completed', task.completed);
+                }
+                
+                // Save and re-render after any change
+                saveTasks();
+                renderTasks(selectedDate);
+            });
+
+            function scheduleRevisions(taskText, completedDateStr) {
+                const intervals = [1, 3, 7, 14, 21];
+                const endDate = new Date('2025-11-30');
+                const completedDate = new Date(completedDateStr);
+
+                intervals.forEach(interval => {
+                    const revisionDate = new Date(completedDate);
+                    revisionDate.setDate(revisionDate.getDate() + interval);
+                    if (revisionDate <= endDate) {
+                        const revisionDateStr = revisionDate.toISOString().split('T')[0];
+                        if (!tasks[revisionDateStr]) tasks[revisionDateStr] = [];
+                        tasks[revisionDateStr].push({ text: `Revision: ${taskText}`, completed: false, isRevision: true });
+                    }
+                });
+                saveTasks();
+            }
+
+            function initialize() {
+                getUserName();
+                
+                const today = new Date().toISOString().split('T')[0];
+                calendar.value = today;
+                renderTasks(today);
+
+                setupCountdown('syllabus-date', 'syllabus-countdown', 'syllabusDate');
+                setupCountdown('syllabus-final-date', 'syllabus-final-countdown', 'syllabusFinalDate');
+                setupCountdown('prelims-date', 'prelims-countdown', 'prelimsDate');
+                
+                showMotivationalQuote();
+                setInterval(showMotivationalQuote, 10000);
+
+                calendar.addEventListener('change', (e) => {
+                    const selectedDate = e.target.value;
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    progressTitle.textContent = (selectedDate === todayStr) ? "Today's Progress" : "Day's Progress";
+                    renderTasks(selectedDate);
+                });
+            }
+
+            initialize();
+        });
+    </script>
+</body>
+</html>
